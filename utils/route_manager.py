@@ -27,7 +27,7 @@ class RouteManager:
         :param blueprint_name: 蓝图的名称，用于从配置中获取对应的路由配置。
         """
         # 基础API路径来自于配置文件
-        base_api = config["flask"]["baseApi"]
+        base_api = config["flask"]["base_api"]
         # 获取指定蓝图的配置信息
         api_config = config["flask"]["blueprints"][blueprint_name]
 
