@@ -50,33 +50,58 @@ pip install -r requirements.txt
 
 ```yaml
 flask:
-  host: "0.0.0.0"
-  port: 5222
-  baseApi: "/song"
+  host: 0.0.0.0          # 运行Flask服务的主机地址，0.0.0.0代表监听所有公开的IP地址
+  port: 5222             # 运行Flask服务的端口号
+  baseApi: /song         # API的基础路径，所有蓝图的路由都将以此路径作为前缀
+
+  # `blueprints`节定义了多个蓝图，用于组织不同的路由群组
   blueprints:
-    test:
-      TestManager:
-        module: "api.test"
-        class: "TestManager"
-        routes:
-          "/test":
-            - endpoint: "create_task"
+    # 自定义蓝图名称
+    example_name:
+      # 在此下定义test1蓝图相关的类与路由信息
+      TestManager:               # TestManager为这部分配置的索引名，是蓝图中的一个组件
+        module: api.test1        # 定义TestManager类所在的模块路径，'.' 表示层级关系
+        class: Test1Manager      # 定义TestManager类的类名
+        routes:                  # 定义该类关联的路由和方法
+          # 定义一个路由地址以及支持的方法
+          /test:
+            - endpoint: create_task    # 定义endpoint名称，同蓝图下不允许重名
+              methods:                # 列出支处理的HTTP方法
+                - POST
+          # 定义带参数的路由，参数由尖括号<>包围
+          # `/song/test/<obj>/<name>`请求时将解析参数至对应的处理函数
+          /test/<int:obj>/<string:name>:
+            - endpoint: get_task_info
+              methods:              # 列出支持的方法
+                - GET
+                - DELETE
+                - PUT
+          # 类似的，还可以定义其他路由和处理函数关联
+          /test/<int:obj>/<string:action>:
+            - endpoint: task_action
               methods:
-                - "POST"
-          "/test/<int:obj>":
-            - endpoint: "get_task_info | delete_task | update_task"
-              methods:
-                - "GET"
-                - "DELETE"
-                - "PUT"
-          "/test/<int:obj>/<string:action>":
-            - endpoint: "task_action"
-              methods:
-                - "GET"
+                - GET
+
+    # test2 蓝图定义开始
+    test2:
+      TestManager:                    # TestManager为这部分配置的索引名
+        module: api.test2             # 定义TestManager类所在的模块路径
+        class: Test2Manager           # 定义TestManager类的类名
+        routes:                       # 定义该类关联的路由和方法
+          /test2:
+            - endpoint: create_task
+              methods:                # 列出支处理的HTTP方法，支持多种方法
+                - POST
+                - GET
+                - PUT
+                - DELETE
+                - PATCH
+                - HEAD
+                - OPTIONS
 ```
 
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
 
-Copyright (c) 2013-present, aqz236
+Copyright (c) 2024-present, aqz236
