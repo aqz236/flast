@@ -15,11 +15,21 @@
 
 ## 如何开始
 
-1. 克隆本项目至本地
+1. 克隆本项目至本地。
+
+```bash
+git clone https://github.com/aqz236/flast
+```
 2. 切换到项目文件夹
+```bash
+cd flast
+```
 3. 安装依赖
-4. 修改`config.yaml`至你需要的设置
-5. 运行你的应用
+```bash
+pip install -r requirements.txt
+```
+4. 修改`config.yaml`至你需要的路由设置
+5. 手动运行utils/generator.py，根据配置生成业务代码
 
 ## 配置说明
 
