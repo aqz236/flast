@@ -1,10 +1,10 @@
 
 # -*- coding: UTF-8 -*-
 from flask.views import MethodView
-from flast.utils.response.R import R
-from flast.utils.response.enums import Code
-from flast.utils.response.msg_enum import SUCCESS_MSG
-from flast.utils.error.decorated_error import handle_exceptions
+from utils.response.R import R
+from utils.response.enums import Code
+from utils.response.msg_enum import SUCCESS_MSG
+from utils.error.decorated_error import handle_exceptions
 
 
 class Test1Manager(MethodView):
