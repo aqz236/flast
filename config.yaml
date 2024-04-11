@@ -1,0 +1,49 @@
+flask:
+  host: "0.0.0.0"
+  port: 5222
+  baseApi: "/song"
+  blueprints:
+    # 蓝图名称（可以自定义，用做不同蓝图的隔离以及蓝图下路由的查询）
+    test1:
+      # 模块名称（可以自定义）
+      TestManager:
+        # 模块路径（可以自定义，支持多级路径最后一个.后面为文件名）
+        module: "api.test1"
+        # 模块类名（可以自定义）
+        class: "Test1Manager"
+        # 模块路由
+        routes:
+          # 路由地址（可以自定义，最终请求地址为：http(s)://x.x.x.x:5222/song/test）
+          "/test":
+            # 端点名称（可自定义，同蓝图下不可重复，不同蓝图可重复）
+            - endpoint: "create_task"
+              # 路由支持的方法（支持Restful风格，配合代码生成器自动生成业务代码）
+              methods:
+                - "POST"
+          "/test/<int:obj>":
+            - endpoint: "get_task_info | delete_task | update_task"
+              methods:
+                - "GET"
+                - "DELETE"
+                - "PUT"
+          "/test/<int:obj>/<string:action>":
+            - endpoint: "task_action"
+              methods:
+                - "GET"
+
+    test2:
+      TestManager:
+        module: "api.test2"
+        class: "Test2Manager"
+        routes:
+          "/test2":
+            - endpoint: "create_task"
+              methods:
+                - "POST"
+                - "GET"
+                - "PUT"
+                - "DELETE"
+                - "PATCH"
+                - "HEAD"
+                - "OPTIONS"
+
