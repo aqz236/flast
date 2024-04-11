@@ -1,10 +1,9 @@
 import os
+import textwrap
 from jinja2 import Environment, FileSystemLoader
-from flast.utils.config import ConfigUtil
+from config import ConfigUtil
 
-config_json = ConfigUtil().get_config()
-
-flask_blueprint_template = """
+flask_template = """
 # -*- coding: UTF-8 -*-
 from flask.views import MethodView
 from utils.response.R import R
@@ -19,23 +18,73 @@ class {{ class_name }}(MethodView):
         {% if method_detail.arg_details %}
         {{ method_detail.arg_details|trim }}
         {% else %}
-        # 在此编写实现细节
+        # Write the implementation details here
         {% endif %}
         return R().code(Code.SUCCESS).msg(SUCCESS_MSG).data({}).build()
     {% endfor %}
 """
+config_json = ConfigUtil().get_config()
+
+
+def extract_args(route):
+    """
+    从路由字符串中提取参数名。
+
+    参数：
+    - route: 字符串，表示一个URL路由，其中参数使用尖括号（<>）包裹。
+
+    返回值：
+    - list: 包含所有参数名的列表，参数名是从路由中提取的，不包含尖括号。
+
+    示例：
+    - 对于路由字符串`'/users/<int:user_id>/posts/<str:post_title>'`，
+      将返回`['user_id', 'post_title']`。
+    """
+    # 使用列表推导式从路由中提取参数名
+    return [part[1:-1].split(':')[1] for part in route.split('/') if part.startswith('<') and part.endswith('>')]
+
+
+def generate_optional_arg_details(arg_names):
+    """
+    生成关于可选参数的细节描述。
+
+    参数:
+    arg_names: 一个包含参数名的列表，这些参数可能是可选的。
+
+    返回值:
+    根据提供的参数名列表，生成一个条件判断结构的字符串，用于检查除第一个参数外的其他参数是否为None。
+    如果参数列表长度小于等于1，返回空字符串。
+    """
+    if len(arg_names) <= 1:
+        return ""
+
+    # 构建条件字符串，检查每个参数是否不为None
+    conditions = " and ".join(f"{arg} is not None" for arg in arg_names[1:])
+
+    # 定义一个无缩进的多行字符串模板，用于构建条件判断的框架
+    no_indent_template = """\
+if {conditions}:
+    pass
+else:
+    pass"""
+
+    # 将条件字符串插入到模板中
+    no_indent_result = no_indent_template.format(conditions=conditions)
+
+    # 使用textwrap.indent为最终结果增加缩进
+    result = textwrap.indent(no_indent_result, '        ')
+    return result
 
 
 def generate_flask_files(config):
     env = Environment(loader=FileSystemLoader('.'))
-    template = env.from_string(flask_blueprint_template)
+    template = env.from_string(flask_template)
 
     for module_name, details in config['flask']['blueprints'].items():
         for class_description, class_details in details.items():
             module_path = os.path.join('..', class_details['module'].replace('.', '/'))
             directory, file_name = os.path.split(module_path)
-            if not os.path.isdir(directory):
-                os.makedirs(directory, exist_ok=True)
+            os.makedirs(directory, exist_ok=True)
             full_file_path = os.path.join(directory, file_name + '.py')
 
             methods = {}
@@ -44,26 +93,12 @@ def generate_flask_files(config):
                     for http_method in endpoint['methods']:
                         method_name = http_method.lower()
                         if method_name not in methods:
-                            methods[method_name] = {
-                                "arg_list": "",
-                                "arg_details": ""
-                            }
-                        # Extract arguments from the route
-                        arg_names = []
-                        for part in route.split('/'):
-                            if part.startswith('<') and part.endswith('>'):
-                                arg_type, arg_name = part[1:-1].split(':')
-                                arg_names.append(arg_name)
-                        # Update the method details with arguments
-                        # Default all args after the first to None
+                            methods[method_name] = {"arg_list": "", "arg_details": ""}
+
+                        arg_names = extract_args(route)
                         default_args = [f"{arg}=None" if i != 0 else arg for i, arg in enumerate(arg_names)]
                         methods[method_name]["arg_list"] = ", ".join(default_args)
-
-                        # Generate optional arg handling logic
-                        if len(arg_names) > 1:
-                            optional_arg_details = "if " + " and ".join([f"{arg} is not None" for arg in arg_names[1:]])
-                            optional_arg_details += ":\n            # Handle case where all optional args are provided\n            pass\n        else:\n            # Handle case where some or no optional args are provided\n            pass"
-                            methods[method_name]["arg_details"] = optional_arg_details
+                        methods[method_name]["arg_details"] = generate_optional_arg_details(arg_names)
 
             with open(full_file_path, 'w', encoding='utf-8') as f:
                 f.write(template.render(class_name=class_details['class'], methods=methods))
