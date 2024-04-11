@@ -1,7 +1,7 @@
 ## Flast
 
-**这是一个基于 [Flask](https://github.com/pallets/flask) 构建的超轻量级，用于构建 Web 应用程序的 Python 脚手架，强调配置大于编码的哲学。
-整个脚手架大小仅26KB，通过配置`config.yaml`文件以生成路由，只需简单地配置，配合内置的代码生成器，自动化生成业务代码。**
+**这是一个基于 [Flask](https://github.com/pallets/flask) 构建的超轻量级，用于构建 Web 应用程序的 Python 脚手架，封装灵感来自Spring的配置文件，强调配置大于编码的哲学。
+整个脚手架大小仅26KB，通过配置`config.yaml`文件以生成路由，只需简单地配置，配合内置的代码生成器，自动化生成业务代码、自动注册路由。**
 
 
 
