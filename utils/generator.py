@@ -80,12 +80,26 @@ def generate_flask_files(config):
     env = Environment(loader=FileSystemLoader('.'))
     template = env.from_string(flask_template)
 
+    # 初始化计数器
+    files_generated = 0
+    files_skipped = 0
+
+    # 初始化列表用于存储文件路径
+    skipped_files_list = []
+    generated_files_list = []
+
     for module_name, details in config['flask']['blueprints'].items():
         for class_description, class_details in details.items():
             module_path = os.path.join('..', class_details['module'].replace('.', '/'))
             directory, file_name = os.path.split(module_path)
             os.makedirs(directory, exist_ok=True)
             full_file_path = os.path.join(directory, file_name + '.py')
+
+            if os.path.isfile(full_file_path):
+                print(f"文件已存在，已略过: {full_file_path}")
+                files_skipped += 1
+                skipped_files_list.append(full_file_path)
+                continue
 
             methods = {}
             for route, endpoint_list in class_details['routes'].items():
@@ -102,11 +116,19 @@ def generate_flask_files(config):
 
             with open(full_file_path, 'w', encoding='utf-8') as f:
                 f.write(template.render(class_name=class_details['class'], methods=methods))
+                files_generated += 1
+                generated_files_list.append(full_file_path)
+
+    # 打印统计信息
+    print(f"生成文件个数：{files_generated}")
+    print("生成的文件列表：")
+    for file_path in generated_files_list:
+        print(file_path)
+
+    print(f"跳过文件个数：{files_skipped}")
+    print("跳过的文件列表：")
+    for file_path in skipped_files_list:
+        print(file_path)
 
 
-# 本操作会按照配置文件的路径创建文件，是覆盖的操作，请谨慎使用
-print("本操作会按照配置文件的路径创建文件，是覆盖的操作，请确保配置文件中要生成的文件跟先有文件不冲突，请谨慎使用！ ")
-if input("是否要根据配置文件生成代码？(y/n)") == 'y':
-    generate_flask_files(config_json)
-else:
-    exit()
+generate_flask_files(config_json)
