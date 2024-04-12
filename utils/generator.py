@@ -104,4 +104,9 @@ def generate_flask_files(config):
                 f.write(template.render(class_name=class_details['class'], methods=methods))
 
 
-generate_flask_files(config_json)
+# 本操作会按照配置文件的路径创建文件，是覆盖的操作，请谨慎使用
+print("本操作会按照配置文件的路径创建文件，是覆盖的操作，请确保配置文件中要生成的文件跟先有文件不冲突，请谨慎使用！ ")
+if input("是否要根据配置文件生成代码？(y/n)") == 'y':
+    generate_flask_files(config_json)
+else:
+    exit()
