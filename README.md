@@ -48,6 +48,36 @@ pip install -r requirements.txt
 
 `config.yaml`主要配置项目路由和一些其他信息。下面是一个示例，供理解参考。
 
+
+```yaml
+flask:
+  host: 0.0.0.0          # 运行Flask服务的主机地址，0.0.0.0代表监听所有公开的IP地址
+  port: 5222             # 运行Flask服务的端口号
+  base_api: /song         # API的基础路径，所有蓝图的路由都将以此路径作为前缀
+  blueprints:
+    搜索类:
+      关键词搜索:
+        module: api.search_keyword
+        class: SearchKeyword
+        routes:
+          /search_by_keyword/<string:keyword>:
+            - endpoint: search_by_keyword
+              methods:
+                - GET
+                - POST
+      ID搜索:
+        module: api.search_id
+        class: SearchID
+        routes:
+          /search_by_id/<string:id>:
+            - endpoint: search_by_id
+              methods:
+                - GET
+                - POST
+```
+
+较为完整注释的配置文件如下
+
 ```yaml
 flask:
   host: 0.0.0.0          # 运行Flask服务的主机地址，0.0.0.0代表监听所有公开的IP地址
